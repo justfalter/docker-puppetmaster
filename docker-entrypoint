@@ -1,0 +1,22 @@
+#!/usr/bin/ruby
+require 'fileutils'
+
+def is_empty?(path)
+  (Dir.entries(path) - ['.','..']).length == 0
+end
+
+if is_empty?('/etc/puppet') 
+  $stderr.puts "Copying /etc/puppet.skel/* to /etc/puppet"
+  FileUtils.cp_r Dir.glob('/etc/puppet.skel/*'), '/etc/puppet', :verbose => true
+end
+
+if is_empty?('/var/lib/puppet') 
+  $stderr.puts "Copying /var/libc/puppet.skel/* to /var/lib/puppet"
+  FileUtils.cp_r Dir.glob('/var/lib/puppet.skel/*'), '/var/lib/puppet', :verbose => true
+end
+
+FileUtils.chown_R "puppet","puppet", "/etc/puppet", :verbose => true
+FileUtils.chown_R "puppet","puppet", "/var/lib/puppet", :verbose => true
+
+$stderr.puts "Starting puppet"
+exec "/usr/bin/puppet", "master", "--no-daemonize", "--verbose"
